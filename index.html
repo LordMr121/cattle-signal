@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1a2e0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cattle Signal">
+<title>Cattle Signal</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f1a08;--bg2:#1a2e0f;--bg3:#223a12;
+  --surf:#1e3512;--surf2:#2a4a18;
+  --bdr:#2e4e1a;--bdr2:#3e6222;
+  --grass:#4e9e26;--grass2:#72c244;
+  --straw:#c8a030;--straw2:#e8c04a;
+  --red:#c84040;--red2:#f06060;
+  --txt:#e0ecd8;--txt2:#94b080;--txt3:#5e7850;
+  --mono:'DM Mono','Courier New',monospace;
+  --disp:'Bebas Neue',Impact,sans-serif;
+  --body:'DM Sans',-apple-system,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{min-height:100dvh;background:var(--bg);color:var(--txt);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* HEADER */
+.hdr{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:12px 18px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding-top:max(12px,env(safe-area-inset-top))}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:28px;line-height:1}
+.logo-title{font-family:var(--disp);font-size:26px;letter-spacing:2px;color:var(--grass2);line-height:1}
+.logo-sub{font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:.12em;text-transform:uppercase}
+.last-upd{font-family:var(--mono);font-size:10px;color:var(--txt3)}
+
+/* MAIN */
+.main{padding:18px 18px 60px;max-width:620px;margin:0 auto}
+
+/* SETUP */
+.setup{background:var(--surf);border:1px solid var(--bdr2);border-radius:12px;padding:18px;margin-bottom:16px;transition:opacity .4s}
+.setup-title{font-family:var(--disp);font-size:18px;letter-spacing:1px;color:var(--straw2);margin-bottom:6px}
+.setup-desc{font-size:12px;color:var(--txt2);line-height:1.7;margin-bottom:12px}
+.setup-desc a{color:var(--grass2)}
+.setup-row{display:flex;gap:8px}
+.key-input{flex:1;background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt);font-family:var(--mono);font-size:12px;padding:9px 12px;border-radius:7px;outline:none;transition:border-color .2s}
+.key-input:focus{border-color:var(--grass2)}
+.key-input::placeholder{color:var(--txt3)}
+.save-btn{background:var(--grass);color:#fff;border:none;border-radius:7px;padding:9px 16px;font-family:var(--mono);font-size:11px;cursor:pointer;white-space:nowrap;transition:background .15s}
+.save-btn:hover{background:var(--grass2)}
+.key-ok{font-family:var(--mono);font-size:10px;color:var(--grass2);margin-top:6px;display:none}
+.key-ok.show{display:block}
+
+/* FETCH BAR */
+.fbar{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.fstatus{flex:1;font-family:var(--mono);font-size:11px;color:var(--txt3);line-height:1.4}
+.fstatus.live{color:var(--grass2)}.fstatus.err{color:var(--red2)}
+.fbtn{background:var(--grass);color:#fff;border:none;border-radius:7px;padding:9px 16px;font-family:var(--mono);font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s,transform .1s;flex-shrink:0}
+.fbtn:active{transform:scale(.96)}.fbtn:disabled{background:var(--bg3);color:var(--txt3);cursor:not-allowed}
+.spin{display:inline-block;width:10px;height:10px;border:1.5px solid var(--bdr2);border-top-color:var(--grass2);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* HERO */
+.hero{background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;right:-24px;top:-24px;width:120px;height:120px;background:var(--grass);opacity:.07;border-radius:50%;pointer-events:none}
+.hero-row{display:flex;align-items:flex-start;gap:16px}
+.score-num{font-family:var(--disp);font-size:76px;line-height:1;color:var(--grass2);min-width:110px;text-align:center;transition:color .4s}
+.score-num.warn{color:var(--straw2)}.score-num.bad{color:var(--red2)}
+.score-denom{font-family:var(--mono);font-size:11px;color:var(--txt3);text-align:center;margin-top:-4px}
+.hero-right{flex:1;padding-top:8px}
+.verdict{font-family:var(--disp);font-size:22px;letter-spacing:1px;color:var(--txt);margin-bottom:5px}
+.hero-desc{font-size:12px;color:var(--txt2);line-height:1.65}
+.bar-track{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:14px}
+.bar-fill{height:100%;border-radius:3px;background:var(--grass);transition:width .7s cubic-bezier(.4,0,.2,1),background .4s}
+
+/* SECTION */
+.sec{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--txt3);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+.sec::after{content:'';flex:1;height:1px;background:var(--bdr)}
+
+/* SIGNAL CARDS */
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sig-card{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:12px}
+.sig-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.sig-name{font-size:12px;font-weight:500;color:var(--txt);line-height:1.3;flex:1;padding-right:6px}
+.sig-wt{font-family:var(--mono);font-size:9px;color:var(--txt3);background:var(--bg3);border:1px solid var(--bdr);border-radius:3px;padding:1px 5px;white-space:nowrap;flex-shrink:0}
+.sig-val{font-family:var(--disp);font-size:34px;line-height:1;color:var(--grass2);margin-bottom:2px;transition:color .3s}
+.sig-val.warn{color:var(--straw2)}.sig-val.bad{color:var(--red2)}.sig-val.pend{font-family:var(--mono);font-size:20px;color:var(--txt3)}
+.sig-raw{font-family:var(--mono);font-size:11px;color:var(--txt2);margin-top:2px;font-weight:500}
+.sig-detail{font-family:var(--mono);font-size:10px;color:var(--txt3);line-height:1.4;margin-top:2px}
+.sig-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:8px}
+.sig-bar-fill{height:100%;border-radius:2px;background:var(--grass);transition:width .5s ease,background .3s}
+
+/* STOCK CARDS */
+.stk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:400px){.stk-grid{grid-template-columns:1fr 1fr}}
+.stk-card{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:11px 12px}
+.stk-ticker{font-family:var(--disp);font-size:20px;letter-spacing:1px;color:var(--grass2);line-height:1}
+.stk-name{font-size:10px;color:var(--txt3);margin:2px 0 8px;line-height:1.3}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 8px;border-radius:4px;letter-spacing:.04em}
+.b-buy{background:#1e3d10;color:#72c244;border:1px solid #3a6222}
+.b-hold{background:#3a2e08;color:#e8c04a;border:1px solid #6a5010}
+.b-wait{background:#3a1010;color:#f06060;border:1px solid #6a2020}
+.b-pend{background:var(--bg3);color:var(--txt3);border:1px solid var(--bdr)}
+.stk-price{font-family:var(--mono);font-size:12px;color:var(--txt2);margin-top:5px;font-weight:500}
+.stk-chg{font-family:var(--mono);font-size:10px;margin-top:2px}
+.chg-up{color:var(--grass2)}.chg-dn{color:var(--red2)}.chg-neu{color:var(--txt3)}
+
+/* RAW TABLE */
+.raw-wrap{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;overflow:hidden}
+.raw-table{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono)}
+.raw-table th{text-align:left;color:var(--txt3);font-weight:400;padding:8px 12px;border-bottom:1px solid var(--bdr);background:var(--bg3);font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+.raw-table td{padding:8px 12px;border-bottom:1px solid var(--bdr);color:var(--txt);vertical-align:middle}
+.raw-table tr:last-child td{border-bottom:none}
+.pill{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px}
+.p-bull{background:#1e3d10;color:#72c244}.p-bear{background:#3a1010;color:#f06060}.p-neu{background:var(--bg3);color:var(--txt3)}
+
+/* INSTALL */
+.inst-guide{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-top:20px}
+.inst-guide summary{font-family:var(--mono);font-size:11px;color:var(--txt2);cursor:pointer;letter-spacing:.06em;text-transform:uppercase;list-style:none;display:flex;align-items:center;gap:6px;user-select:none}
+.inst-guide summary::before{content:'▶';font-size:9px;transition:transform .2s}
+.inst-guide[open] summary::before{transform:rotate(90deg)}
+.inst-guide p{font-size:12px;color:var(--txt2);line-height:1.7;margin-top:12px}
+.inst-guide strong{color:var(--txt)}
+.inst-step{margin-top:6px;font-size:12px;color:var(--txt2);line-height:1.6;padding-left:4px}
+.note{margin-top:24px;font-size:10px;color:var(--txt3);font-style:italic;text-align:center;line-height:1.7;padding:0 8px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fade{animation:fadeUp .35s ease both}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo">
+    <span class="logo-icon">🐄</span>
+    <div>
+      <div class="logo-title">CATTLE SIGNAL</div>
+      <div class="logo-sub">Live Market Scorer</div>
+    </div>
+  </div>
+  <div class="last-upd" id="lastUpd">—</div>
+</header>
+
+<main class="main">
+
+  <!-- API KEY -->
+  <div class="setup fade" id="setupCard">
+    <div class="setup-title">⚙ Finnhub API Key</div>
+    <div class="setup-desc">
+      Enter your free Finnhub API key to enable live data.<br>
+      Get one free at <a href="https://finnhub.io" target="_blank">finnhub.io</a> — no credit card needed.<br>
+      Your key is saved only on this device.
+    </div>
+    <div class="setup-row">
+      <input class="key-input" type="password" id="apiKeyInput" placeholder="your_finnhub_key_here" autocomplete="off">
+      <button class="save-btn" onclick="saveKey()">Save</button>
+    </div>
+    <div class="key-ok" id="keyOk">✓ Key saved — press Fetch to load live data</div>
+  </div>
+
+  <!-- FETCH BAR -->
+  <div class="fbar fade">
+    <div class="fstatus" id="fstatus">Enter your Finnhub key above, then press Fetch</div>
+    <button class="fbtn" id="fbtn" onclick="fetchAll()">⬇ Fetch Live Data</button>
+  </div>
+
+  <!-- HERO SCORE -->
+  <div class="hero fade">
+    <div class="hero-row">
+      <div>
+        <div class="score-num" id="masterScore">—</div>
+        <div class="score-denom">out of 10</div>
+      </div>
+      <div class="hero-right">
+        <div class="verdict" id="masterVerdict">Awaiting data</div>
+        <div class="hero-desc" id="masterDesc">Fetch live market data to generate your buy/sell signal across cattle equities.</div>
+      </div>
+    </div>
+    <div class="bar-track"><div class="bar-fill" id="masterBar" style="width:0%"></div></div>
+  </div>
+
+  <!-- SIGNALS -->
+  <div class="sec">Signal breakdown</div>
+  <div class="sig-grid fade">
+    <div class="sig-card">
+      <div class="sig-top"><span class="sig-name">Live cattle proxy</span><span class="sig-wt">20%</span></div>
+      <div class="sig-val pend" id="sv1">—</div>
+      <div class="sig-raw" id="sr1"></div>
+      <div class="sig-detail" id="sl1">COW ETF · livestock benchmark</div>
+      <div class="sig-bar"><div class="sig-bar-fill" id="sb1" style="width:0%"></div></div>
+    </div>
+    <div class="sig-card">
+      <div class="sig-top"><span class="sig-name">Corn price proxy</span><span class="sig-wt">20%</span></div>
+      <div class="sig-val pend" id="sv2">—</div>
+      <div class="sig-raw" id="sr2"></div>
+      <div class="sig-detail" id="sl2">CORN ETF · feed cost signal</div>
+      <div class="sig-bar"><div class="sig-bar-fill" id="sb2" style="width:0%"></div></div>
+    </div>
+    <div class="sig-card">
+      <div class="sig-top"><span class="sig-name">Soybean meal proxy</span><span class="sig-wt">15%</span></div>
+      <div class="sig-val pend" id="sv3">—</div>
+      <div class="sig-raw" id="sr3"></div>
+      <div class="sig-detail" id="sl3">SOYB ETF · protein feed cost</div>
+      <div class="sig-bar"><div class="sig-bar-fill" id="sb3" style="width:0%"></div></div>
+    </div>
+    <div class="sig-card">
+      <div class="sig-top"><span class="sig-name">Tyson Foods (TSN)</span><span class="sig-wt">20%</span></div>
+      <div class="sig-val pend" id="sv4">—</div>
+      <div class="sig-raw" id="sr4"></div>
+      <div class="sig-detail" id="sl4">Largest beef processor</div>
+      <div class="sig-bar"><div class="sig-bar-fill" id="sb4" style="width:0%"></div></div>
+    </div>
+    <div class="sig-card">
+      <div class="sig-top"><span class="sig-name">Seasonal demand</span><span class="sig-wt">15%</span></div>
+      <div class="sig-val pend" id="sv5">—</div>
+      <div class="sig-raw" id="sr5"></div>
+      <div class="sig-detail" id="sl5">Current quarter outlook</div>
+      <div class="sig-bar"><div class="sig-bar-fill" id="sb5" style="width:0%"></div></div>
+    </div>
+    <div class="sig-card">
+      <div class="sig-top"><span class="sig-name">Ag sector momentum</span><span class="sig-wt">10%</span></div>
+      <div class="sig-val pend" id="sv6">—</div>
+      <div class="sig-raw" id="sr6"></div>
+      <div class="sig-detail" id="sl6">MOO ETF · broad ag signal</div>
+      <div class="sig-bar"><div class="sig-bar-fill" id="sb6" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- STOCKS -->
+  <div class="sec">Stock signals</div>
+  <div class="stk-grid fade">
+    <div class="stk-card"><div class="stk-ticker">TSN</div><div class="stk-name">Tyson Foods</div><span class="badge b-pend" id="sig-TSN">—</span><div class="stk-price" id="px-TSN">—</div><div class="stk-chg" id="chg-TSN"></div></div>
+    <div class="stk-card"><div class="stk-ticker">CALF</div><div class="stk-name">Pacer Cash Cows ETF</div><span class="badge b-pend" id="sig-CALF">—</span><div class="stk-price" id="px-CALF">—</div><div class="stk-chg" id="chg-CALF"></div></div>
+    <div class="stk-card"><div class="stk-ticker">CALM</div><div class="stk-name">Cal-Maine Foods</div><span class="badge b-pend" id="sig-CALM">—</span><div class="stk-price" id="px-CALM">—</div><div class="stk-chg" id="chg-CALM"></div></div>
+    <div class="stk-card"><div class="stk-ticker">SFD</div><div class="stk-name">Smithfield Foods</div><span class="badge b-pend" id="sig-SFD">—</span><div class="stk-price" id="px-SFD">—</div><div class="stk-chg" id="chg-SFD"></div></div>
+    <div class="stk-card"><div class="stk-ticker">ADM</div><div class="stk-name">Archer-Daniels-Midland</div><span class="badge b-pend" id="sig-ADM">—</span><div class="stk-price" id="px-ADM">—</div><div class="stk-chg" id="chg-ADM"></div></div>
+    <div class="stk-card"><div class="stk-ticker">BG</div><div class="stk-name">Bunge Global</div><span class="badge b-pend" id="sig-BG">—</span><div class="stk-price" id="px-BG">—</div><div class="stk-chg" id="chg-BG"></div></div>
+  </div>
+
+  <!-- RAW TABLE -->
+  <div class="sec">Raw prices</div>
+  <div class="raw-wrap fade">
+    <table class="raw-table">
+      <thead><tr><th>Ticker</th><th>Price</th><th>Change</th><th>Trend</th></tr></thead>
+      <tbody id="rawBody"><tr><td colspan="4" style="text-align:center;color:var(--txt3);padding:20px">No data yet</td></tr></tbody>
+    </table>
+  </div>
+
+  <details class="inst-guide fade">
+    <summary>How to install on your phone or computer</summary>
+    <p><strong>iPhone / iPad (Safari):</strong></p>
+    <div class="inst-step">1. Open this page in Safari</div>
+    <div class="inst-step">2. Tap Share → "Add to Home Screen" → Add</div>
+    <p style="margin-top:12px"><strong>Android (Chrome):</strong></p>
+    <div class="inst-step">1. Tap 3-dot menu → "Add to Home screen" → Install</div>
+    <p style="margin-top:12px"><strong>Desktop (Chrome / Edge):</strong></p>
+    <div class="inst-step">1. Click the ⊕ install icon in the address bar → Install</div>
+  </details>
+
+  <div class="note">⚠ Prices via Finnhub free tier. ETF proxies used for commodity signals (COW, CORN, SOYB, MOO). Not financial advice — verify before trading.</div>
+</main>
+
+<script>
+// ── Key management ──────────────────────────────────────────────────────────
+function saveKey() {
+  const k = document.getElementById('apiKeyInput').value.trim();
+  if (!k) { alert('Please enter your Finnhub API key'); return; }
+  localStorage.setItem('finnhub_key', k);
+  document.getElementById('keyOk').classList.add('show');
+  document.getElementById('apiKeyInput').value = '';
+  document.getElementById('fstatus').textContent = 'Key saved — press Fetch to load live data';
+  setTimeout(() => {
+    document.getElementById('setupCard').style.opacity = '0';
+    setTimeout(() => document.getElementById('setupCard').style.display = 'none', 400);
+  }, 1200);
+}
+function getKey() { return localStorage.getItem('finnhub_key') || ''; }
+
+window.addEventListener('load', () => {
+  if (getKey()) {
+    document.getElementById('setupCard').style.display = 'none';
+    document.getElementById('fstatus').textContent = 'Ready — press Fetch to load live data';
+  }
+});
+
+// ── Finnhub quote fetch ──────────────────────────────────────────────────────
+async function getQuote(symbol, key) {
+  const url = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${key}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${symbol}: HTTP ${res.status}`);
+  const d = await res.json();
+  if (d.c === 0 && d.pc === 0) throw new Error(`${symbol}: no data`);
+  return {
+    symbol,
+    price:  d.c,   // current price
+    prev:   d.pc,  // previous close
+    change: d.c - d.pc,
+    changePct: ((d.c - d.pc) / d.pc) * 100,
+    high:   d.h,
+    low:    d.l
+  };
+}
+
+// ── Fetch all tickers ────────────────────────────────────────────────────────
+const SIGNAL_TICKERS = ['COW','CORN','SOYB','TSN','MOO'];
+const STOCK_TICKERS  = ['TSN','CALF','CALM','SFD','ADM','BG'];
+const ALL_TICKERS    = [...new Set([...SIGNAL_TICKERS, ...STOCK_TICKERS])];
+
+async function fetchAll() {
+  const key = getKey();
+  if (!key) {
+    document.getElementById('setupCard').style.display = 'block';
+    document.getElementById('setupCard').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('fstatus').textContent = 'Please enter your Finnhub API key first ↑';
+    document.getElementById('fstatus').className = 'fstatus err';
+    return;
+  }
+
+  const btn = document.getElementById('fbtn');
+  const st  = document.getElementById('fstatus');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Fetching...';
+  st.textContent = 'Pulling live prices from Finnhub...';
+  st.className = 'fstatus';
+
+  try {
+    // Fetch all with small delay to avoid rate limit (60/min free tier)
+    const results = {};
+    for (const ticker of ALL_TICKERS) {
+      try {
+        results[ticker] = await getQuote(ticker, key);
+        await new Promise(r => setTimeout(r, 120)); // ~8 per second, well under limit
+      } catch(e) {
+        console.warn('Skip', ticker, e.message);
+        results[ticker] = null;
+      }
+    }
+
+    render(results);
+    const now = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+    st.textContent = `✓ Live — updated ${now}`;
+    st.className = 'fstatus live';
+    document.getElementById('lastUpd').textContent = now;
+
+  } catch(err) {
+    st.textContent = '⚠ ' + err.message;
+    st.className = 'fstatus err';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '⟳ Refresh';
+}
+
+// ── Scoring helpers ──────────────────────────────────────────────────────────
+// Score based on % change vs prev close + position relative to recent range
+function scoreByMomentum(q, invertSignal = false) {
+  if (!q) return 5;
+  const pct = q.changePct;
+  // For feed costs (corn, soy) invert: falling prices = bullish for cattle
+  const signal = invertSignal ? -pct : pct;
+  if (signal > 2)    return Math.min(10, 8 + signal * 0.2);
+  if (signal > 0.5)  return 7;
+  if (signal > -0.5) return 5;
+  if (signal > -2)   return 3;
+  return Math.max(0, 2 + signal * 0.2);
+}
+
+function scoreSeasonal() {
+  const m = new Date().getMonth();
+  if (m >= 6 && m <= 8) return { score: 9, label: 'Q3 — Peak grilling season' };
+  if (m >= 3 && m <= 5) return { score: 7, label: 'Q2 — Grilling ramp-up' };
+  if (m >= 9 && m <= 11) return { score: 5, label: 'Q4 — Mixed demand' };
+  return { score: 3, label: 'Q1 — Seasonal slow period' };
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render(d) {
+  const seasonal = scoreSeasonal();
+
+  const scores = {
+    cattle:   scoreByMomentum(d['COW'],  false),  // livestock ETF — rising = bullish
+    corn:     scoreByMomentum(d['CORN'], true),   // corn ETF — falling = bullish for margins
+    soy:      scoreByMomentum(d['SOYB'], true),   // soy ETF — falling = bullish
+    tsn:      scoreByMomentum(d['TSN'],  false),  // Tyson — rising = bullish sector
+    seasonal: seasonal.score,
+    agMomo:   scoreByMomentum(d['MOO'],  false),  // broad ag ETF momentum
+  };
+
+  // Weighted master (weights match signal card labels)
+  const master = scores.cattle * 0.20 + scores.corn * 0.20 + scores.soy * 0.15 +
+                 scores.tsn * 0.20 + scores.seasonal * 0.15 + scores.agMomo * 0.10;
+  const mr = Math.round(master * 10) / 10;
+
+  // Helper formatters
+  const fmt  = (q) => q ? '$' + q.price.toFixed(2) : '—';
+  const fmtC = (q) => {
+    if (!q) return '';
+    const c = q.changePct;
+    return (c >= 0 ? '+' : '') + c.toFixed(2) + '%';
+  };
+  const trendLabel = (pct) => pct > 1 ? 'Rising' : pct > 0.2 ? 'Slightly up' : pct < -1 ? 'Falling' : pct < -0.2 ? 'Slightly down' : 'Flat';
+
+  // Signal card definitions
+  const sigDefs = [
+    { sc: scores.cattle,   raw: fmt(d['COW']),   detail: `${fmtC(d['COW'])} today · ${trendLabel(d['COW']?.changePct ?? 0)}` },
+    { sc: scores.corn,     raw: fmt(d['CORN']),  detail: `${fmtC(d['CORN'])} today · ${scores.corn >= 6 ? 'Low — favorable' : scores.corn >= 4 ? 'Moderate' : 'High — cost pressure'}` },
+    { sc: scores.soy,      raw: fmt(d['SOYB']),  detail: `${fmtC(d['SOYB'])} today · ${scores.soy >= 6 ? 'Low — favorable' : 'Elevated cost'}` },
+    { sc: scores.tsn,      raw: fmt(d['TSN']),   detail: `${fmtC(d['TSN'])} today · sector signal` },
+    { sc: scores.seasonal, raw: seasonal.label,  detail: scores.seasonal >= 7 ? 'Strong demand window' : scores.seasonal >= 5 ? 'Average demand' : 'Seasonal lull' },
+    { sc: scores.agMomo,   raw: fmt(d['MOO']),   detail: `${fmtC(d['MOO'])} today · broad ag momentum` },
+  ];
+
+  sigDefs.forEach((s, i) => {
+    const id = i + 1;
+    const sc = Math.round(s.sc * 10) / 10;
+    const ve = document.getElementById('sv' + id);
+    ve.textContent = sc + '/10';
+    ve.className = 'sig-val' + (s.sc >= 6 ? '' : s.sc >= 4 ? ' warn' : ' bad');
+    document.getElementById('sr' + id).textContent = s.raw;
+    document.getElementById('sl' + id).textContent = s.detail;
+    const bar = document.getElementById('sb' + id);
+    bar.style.width = (s.sc * 10) + '%';
+    bar.style.background = s.sc >= 6 ? '#4e9e26' : s.sc >= 4 ? '#c8a030' : '#c84040';
+  });
+
+  // Master score display
+  document.getElementById('masterScore').textContent = mr.toFixed(1);
+  const mbar = document.getElementById('masterBar');
+  mbar.style.width = (master * 10) + '%';
+
+  let verdict, desc, cls, col;
+  if (master >= 7.5)      { verdict='Strong Buy Signal';    cls='';     col='#4e9e26'; desc='Livestock prices rising, feed costs easing, sector momentum strong. Conditions favor entering cattle equity positions.'; }
+  else if (master >= 6)   { verdict='Moderate Buy Signal';  cls='';     col='#72c244'; desc='Most signals positive. Consider partial entry or wait for a pullback.'; }
+  else if (master >= 4.5) { verdict='Hold — Mixed Signals'; cls='warn'; col='#c8a030'; desc='Market is neutral. Maintain existing positions but hold off on adding new exposure.'; }
+  else if (master >= 3)   { verdict='Caution — Wait';       cls='warn'; col='#d47030'; desc='Several signals unfavorable. Rising feed costs or weak livestock prices suggest margin pressure.'; }
+  else                    { verdict='Avoid — Bearish';      cls='bad';  col='#c84040'; desc='Multiple negative signals. High input costs or falling livestock prices point to near-term headwinds.'; }
+
+  document.getElementById('masterScore').className = 'score-num ' + cls;
+  mbar.style.background = col;
+  document.getElementById('masterVerdict').textContent = verdict;
+  document.getElementById('masterDesc').textContent = desc;
+
+  // Stock cards
+  ['TSN','CALF','CALM','SFD','ADM','BG'].forEach(ticker => {
+    const q = d[ticker];
+    const sc = q ? Math.max(0, Math.min(10, master + (q.changePct * 0.2))) : master;
+    const el  = document.getElementById('sig-' + ticker);
+    const pxEl = document.getElementById('px-' + ticker);
+    const chgEl = document.getElementById('chg-' + ticker);
+    if (sc >= 6.5)      { el.textContent='✅ BUY';  el.className='badge b-buy'; }
+    else if (sc >= 4.5) { el.textContent='🟡 HOLD'; el.className='badge b-hold'; }
+    else                { el.textContent='🔴 WAIT'; el.className='badge b-wait'; }
+    if (q) {
+      pxEl.textContent = '$' + q.price.toFixed(2);
+      const c = q.changePct;
+      chgEl.textContent = (c >= 0 ? '+' : '') + c.toFixed(2) + '% today';
+      chgEl.className = 'stk-chg ' + (c > 0 ? 'chg-up' : c < 0 ? 'chg-dn' : 'chg-neu');
+    } else {
+      pxEl.textContent = 'N/A';
+    }
+  });
+
+  // Raw table
+  const allRaw = [...SIGNAL_TICKERS, ...STOCK_TICKERS.filter(t => !SIGNAL_TICKERS.includes(t))];
+  document.getElementById('rawBody').innerHTML = allRaw.map(ticker => {
+    const q = d[ticker];
+    if (!q) return `<tr><td>${ticker}</td><td colspan="3" style="color:var(--txt3)">No data</td></tr>`;
+    const c = q.changePct;
+    const pc = c > 0.5 ? 'p-bull' : c < -0.5 ? 'p-bear' : 'p-neu';
+    return `<tr>
+      <td style="font-weight:500">${ticker}</td>
+      <td style="color:var(--txt2)">$${q.price.toFixed(2)}</td>
+      <td style="color:${c>=0?'#72c244':'#f06060'}">${(c>=0?'+':'')+c.toFixed(2)}%</td>
+      <td><span class="pill ${pc}">${trendLabel(c)}</span></td>
+    </tr>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
